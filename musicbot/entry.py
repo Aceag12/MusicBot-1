@@ -172,6 +172,7 @@ class URLPlaylistEntry(BasePlaylistEntry):
                     await self._really_download(hash=True)
 
             else:
+		# depwl - This is the place where we don't download if it's in the audio_cache. 
                 ldir = os.listdir(self.download_folder)
                 flistdir = [f.rsplit('.', 1)[0] for f in ldir]
                 expected_fname_base = os.path.basename(self.expected_filename)

@@ -1,0 +1,5 @@
+screen -mS MusicBot
+source /home/daniel/Discord/bin/activate
+cd /home/daniel/Discord/MusicBot
+python ./run.py -- Wait for startup and all that.
+Ctrl-A, D
