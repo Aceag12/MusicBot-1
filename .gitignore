@@ -1,6 +1,7 @@
 .idea/
 *.pyc
 ~*/
+*.save
 
 audio_cache/
 dectalk/
