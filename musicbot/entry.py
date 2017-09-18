@@ -172,7 +172,6 @@ class URLPlaylistEntry(BasePlaylistEntry):
                     await self._really_download(hash=True)
 
             else:
-		# depwl - This is the place where we don't download if it's in the audio_cache. 
                 ldir = os.listdir(self.download_folder)
                 flistdir = [f.rsplit('.', 1)[0] for f in ldir]
                 expected_fname_base = os.path.basename(self.expected_filename)
@@ -208,6 +207,7 @@ class URLPlaylistEntry(BasePlaylistEntry):
 
     # noinspection PyShadowingBuiltins
     async def _really_download(self, *, hash=False):
+	# depwl - This is where we ACTUALLY download a youtube video for playback if it is not cached.
         print("[Download] Started:", self.url)
 
         try:
