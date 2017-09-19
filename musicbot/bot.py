@@ -1,3 +1,7 @@
+"""@package bot
+This is the main class for the MusicBot. From here, config is read and commands are processed.
+"""
+
 import os
 import sys
 import time
@@ -37,7 +41,9 @@ from .constants import DISCORD_MSG_CHAR_LIMIT, AUDIO_CACHE_PATH
 
 load_opus_lib()
 
-
+"""@class SkipState
+Not quite sure where this is used yet, but I imagine it has to do with the skip command.
+"""
 class SkipState:
     def __init__(self):
         self.skippers = set()
@@ -56,15 +62,22 @@ class SkipState:
         self.skip_msgs.add(msg)
         return self.skip_count
 
-
+"""@class Response
+Also not sure where this is used. May be the class to process text messages back into Discord, or may be error handling.
+"""
 class Response:
     def __init__(self, content, reply=False, delete_after=0):
         self.content = content
         self.reply = reply
         self.delete_after = delete_after
 
-
+"""@class MusicBot
+This is the main Music Bot class. From here everything happens.
+"""
 class MusicBot(discord.Client):
+	"""@function __init__
+	MusicBot Constructor. Configurable variables are initialized before config file and permissions are read and processed.
+	"""
     def __init__(self, config_file=ConfigDefaults.options_file, perms_file=PermissionsDefaults.perms_file):
         self.players = {}
         self.the_voice_clients = {}
@@ -95,6 +108,9 @@ class MusicBot(discord.Client):
         self.aiosession = aiohttp.ClientSession(loop=self.loop)
         self.http.user_agent += ' MusicBot/%s' % BOTVERSION
 
+	"""@function owner_only
+	Error handler and function wrapper for owner-only commands.
+	"""
     # TODO: Add some sort of `denied` argument for a message to send when someone else tries to use it
     def owner_only(func):
         @wraps(func)
@@ -113,6 +129,12 @@ class MusicBot(discord.Client):
     def _fixg(x, dp=2):
         return ('{:.%sf}' % dp).format(x).rstrip('0').rstrip('.')
 
+	"""@function _get_owner
+	@param voice Search only voice channels.
+	@return owner object
+
+	Determine if configured bot owner is present in server channels, then return the owner object.
+	"""
     def _get_owner(self, voice=False):
         if voice:
             for server in self.servers:
@@ -123,23 +145,31 @@ class MusicBot(discord.Client):
         else:
             return discord.utils.find(lambda m: m.id == self.config.owner_id, self.get_all_members())
 
+	"""@function _delete_old_audiocache
+	@param path AUDIO_CACHE_PATH as defined in constants.py
+	@return success of deletion
+	"""
     def _delete_old_audiocache(self, path=AUDIO_CACHE_PATH):
         try:
-            shutil.rmtree(path)
+            shutil.rmtree(path) """	Delete all files within audio cache. """
+
             return True
-        except:
+        except: """	If it fails, attempt to rename the audio cache directory and try to clear the cache again. """
             try:
                 os.rename(path, path + '__')
             except:
                 return False
             try:
                 shutil.rmtree(path)
-            except:
+            except: """	If rename succeeds but deletion fails, revert the audio cache directory name and return false. """
                 os.rename(path + '__', path)
                 return False
 
         return True
 
+	"""@function _auto_summon
+	Enabled by config.auto_summon. If owner joins a voice channel, attempt to join it as well.
+	"""
     # TODO: autosummon option to a specific channel
     async def _auto_summon(self):
         owner = self._get_owner(voice=True)
@@ -149,6 +179,14 @@ class MusicBot(discord.Client):
             await self.cmd_summon(owner.voice_channel, owner, None)
             return owner.voice_channel
 
+	"""@function _autojoin_channels
+	@param channels List of channels available to the bot.
+
+	Enabled by config.autojoin_channels. Run through any voice channels on the server and attempt to join them.
+	If permission is not given to join the voice channel, or the bot cannot speak on the channel, it will not attempt to join it.
+	When a voice channel is successfully joined, the bot will invoke player.play(). Of course, actual music playback is determined
+	by config.auto_pause which determines if the bot is the only active user in the voice channel.
+	"""
     async def _autojoin_channels(self, channels):
         joined_servers = []
 
@@ -191,15 +229,29 @@ class MusicBot(discord.Client):
             else:
                 print("Invalid channel thing: " + channel)
 
+	"""@function _wait_delete_msg
+	@param message The message id to be deleted on a bound text channel. Manage Messages permission must be given.
+	@param after The time to wait before deleting the message.
+	Enabled by config.delete_messages. Wait a period of time and then delete a message on the text channel.
+	"""
     async def _wait_delete_msg(self, message, after):
         await asyncio.sleep(after)
         await self.safe_delete_message(message)
 
+	"""@function _manual_delete_check
+	@param message The message id to be deleted.
+	@param quiet Should we delete it quietly? Not sure what this is...
+	Enabled by config.delete_invoking. Deletes a message, either quietly or not.
+	"""
     # TODO: Check to see if I can just move this to on_message after the response check
     async def _manual_delete_check(self, message, *, quiet=False):
         if self.config.delete_invoking:
             await self.safe_delete_message(message, quiet=quiet)
 
+	"""@function _check_ignore_non_voice
+	@param msg A pre-validated MusicBot command.
+	Determine if person invoking command is in the voice channel where music is being played.
+	"""
     async def _check_ignore_non_voice(self, msg):
         vc = msg.server.me.voice_channel
 
@@ -210,6 +262,11 @@ class MusicBot(discord.Client):
             raise exceptions.PermissionsError(
                 "you cannot use this command when not in the voice channel (%s)" % vc.name, expire_in=30)
 
+	"""@function generate_invite_link
+	@param permissions Permissions to grant for the generated invite link
+	@param server The server on which to generate the invite link
+	Generate an invite link to the server.
+	"""
     async def generate_invite_link(self, *, permissions=None, server=None):
         if not self.cached_client_id:
             appinfo = await self.application_info()
@@ -217,6 +274,10 @@ class MusicBot(discord.Client):
 
         return discord.utils.oauth_url(self.cached_client_id, permissions=permissions, server=server)
 
+	"""@function get_voice_client
+	@param channel The voice channel we are attempting to join.
+	Attempt to join the configured voice channel(s) determined by config.autojoin_channels.
+	"""
     async def get_voice_client(self, channel):
         if isinstance(channel, Object):
             channel = self.get_channel(channel.id)
@@ -249,7 +310,7 @@ class MusicBot(discord.Client):
             voice_client = VoiceClient(**kwargs)
             self.the_voice_clients[server.id] = voice_client
 
-            retries = 3
+            retries = 3 """ Retry 3 times """
             for x in range(retries):
                 try:
                     print("Attempting connection...")
@@ -545,6 +606,9 @@ class MusicBot(discord.Client):
         except: # Can be ignored
             pass
 
+	"""@function run
+	Main function.
+	"""
     # noinspection PyMethodOverriding
     def run(self):
         try:

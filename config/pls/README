@@ -1,0 +1,1 @@
+*.txt files dropped here will be processed by ../buildauto.py to create ../autoplaylist.txt. Basically, include line-separated lists of youtube links.
