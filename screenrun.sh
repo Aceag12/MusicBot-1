@@ -3,78 +3,56 @@
 #
 # GNU Screen bash startup script (Linux only)
 #
-# This script is meant for auto-restarting Evennia on a Linux server
-# with the standard GNU Screen program installed. Evennia will be
-# launched inside a detached Screen session, you can then connect
-# to with screen -r <gamename>. This will make sure that the
-# runner reload process is not killed when logging out of the server.
-# A Screen session also has the advantage that one can connect to it
-# and operate normally on the server after the fact.
+# This script is intended to start the Discord MusicBot. A couple
+# assumptions are made regarding its setup:
+# 1. MusicBot was built and configured to run within a venv
+# 2. Screen is installed and working properly, and its usage is
+#    not foreign to you.
+#
+# When run, the script will check for existing screen sessions of the
+# same Screen name (e.g. MusicBot). If the MusicBot screen already
+# exists, it will be simply re-attached.
+#
+# Otherwise it will be created and screenrun.sh will be re-invoked
+# within the screen session, where the venv will be activated and
+# MusicBot will be started.
 #
 # Usage:
 #
-# 1. First make sure Evennia can be started manually.
-# 2. Copy this script to mygame/server.
-# 3. Edit the GAMENAME, VIRTUALENV and GAMEDIR vars below to
+# 1. First make sure MusicBot can be started manually.
+# 2. Edit the GAMENAME, VIRTUALENV and GAMEDIR vars below to
 #    match your game.
-# 4. Make it executable with 'chmod u+x evennia-screen.sh'.
-#
-# See also evennia-screen-initd.sh for auto-starting evennia
-# on the server.
+# 3. Make it executable with 'chmod u+x screenrun.sh'.
 #
 #------------------------------------------------------------
 
 # CHANGE to fit your game (obs: no spaces around the '=')
 
-GAMENAME="mygame"
-VIRTUALENV="/home/muddev/mud/pyenv"
-GAMEDIR="/home/muddev/mud/mygame"
+GAMENAME="MusicBot"
+VIRTUALENV="/home/daniel/Discord"
+GAMEDIR="/home/daniel/Discord/MusicBot"
 
 #------------------------------------------------------------
 
-case $1 in
-    start)
-        if [ -z "$STY" ]; then
-            if screen -S "$GAMENAME" -X select .>/dev/null; then
-                # Session already exists. Send the start command instead.
-                echo "(Re-)Starting Evennia."
-                cd "$GAMEDIR"
-                touch "$GAMEDIR"/server/logs/server.log
-                screen -S $GAMENAME -p evennia -X stuff 'evennia --log start\n'
-            else
-                # start GNU Screen then run it with this same script, making sure to
-                # not start Screen on the second call
-                echo "Starting Evennia."
-                exec screen -d -m -S "$GAMENAME" -t evennia /bin/bash "$0" "$1"
-            fi
-        else
-            # this is executed inside the GNU Screen session
-            source "$VIRTUALENV"/bin/activate
-            cd "$GAMEDIR"
-            # these will fail unless server died uncleanly
-            rm "$GAMEDIR"/server/server.pid
-            rm "$GAMEDIR"/server/portal.pid
-            # make sure it exists for the first startup
-            touch "$GAMEDIR"/server/logs/server.log
-            # start evennia itself
-            evennia --log start
-            # we must run this to avoid the screen session exiting immediately
-            exec sh
-        fi
-    ;;
-    stop)
-        cd "$GAMEDIR"
-        screen -S "$GAMENAME" -p evennia -X stuff 'evennia stop\n'
-        echo "Stopped Evennia."
-    ;;
-    reload | restart)
-        cd "$GAMEDIR"
-        screen -S "$GAMENAME" -p evennia -X stuff 'evennia --log reload\n'
-        echo "Reloading Evennia."
-    ;;
-    *)
-        echo "Usage: evennia-screen.sh {start|stop|restart|reload}"
-    exit 1
-;;
+if [ -z "$STY" ]; then
+	if screen -S "$GAMENAME" -X select .>/dev/null; then
+		# Session already exists. Send the start command instead.
+		echo "Discord MusicBot is already running. Reattaching..."
+		cd "$GAMEDIR"
+		screen -r "$GAMENAME"
+	else
+		# start GNU Screen then run it with this same script, making sure to
+		# not start Screen on the second call
+		echo "Starting Discord MusicBot."
+		exec screen -d -m -S "$GAMENAME" -t evennia /bin/bash "$0" "$1"
+	fi
+else
+	# Screen socket is non-zero. Execute in the GNU Screen session.
+	source "$VIRTUALENV"/bin/activate
+	cd "$GAMEDIR"
+	# start evennia itself
+	python run.py
+	# we must run this to avoid the screen session exiting immediately
+	exec sh
+fi
 
-esac
