@@ -27,6 +27,7 @@ from musicbot.player import MusicPlayer
 from musicbot.config import Config, ConfigDefaults
 from musicbot.permissions import Permissions, PermissionsDefaults
 from musicbot.utils import load_file, write_file, sane_round_int
+from musicbot.achaea import get_who, get_who_details
 
 from . import exceptions
 from . import downloader
@@ -1810,6 +1811,14 @@ class MusicBot(discord.Client):
         await self.disconnect_all_voice_clients()
         raise exceptions.TerminateSignal
 
+    async def cmd_awho(self, channel):
+        data = get_who()
+        await self.safe_send_message(channel, "__**Who's online in Achaea:**__\n```" + data + "```\n\nTry " + self.config.command_prefix + "ahonours <name> to check out character details!")
+        
+    async def cmd_ahonours(self, channel, name):
+        await self.safe_send_message(channel, "__**Honours of " + name + ":**__\n" + get_who_details(name))
+        #print(get_who_details(name))
+        
     async def on_message(self, message):
         await self.wait_until_ready()
 
