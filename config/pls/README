@@ -1,1 +1,2 @@
-*.txt files dropped here will be processed by ../buildauto.py to create ../autoplaylist.txt. Basically, include line-separated lists of youtube links.
+*.txt files dropped here will be processed by config/buildauto.py to create config/autoplaylist.txt. Basically, include line-separated lists of youtube links.
+Files in here can be loaded as individual playlists to sub in for autoplaylist.txt by using the Discord command "apl".
