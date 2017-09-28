@@ -1813,13 +1813,54 @@ class MusicBot(discord.Client):
         raise exceptions.TerminateSignal
 
     async def cmd_awho(self, channel):
+        """
+        Usage:
+            {command_prefix}awho
+
+        Displays all online players in Achaea.
+        """
         data = get_who()
-        await self.safe_send_message(channel, "__**Who's online in Achaea:**__\n```" + data + "```\n\nTry " + self.config.command_prefix + "ahonours <name> to check out character details!")
+        await self.safe_send_message(channel, "__**Who's online in Achaea:**__\n```" + data + "```\n\nTry **" + self.config.command_prefix + "ahonours <name>** to check out character details!")
         
     async def cmd_ahonours(self, channel, name):
+        """
+        Usage:
+            {command_prefix}ahonours name
+
+        Display character details for Achaean player.
+        """
         await self.safe_send_message(channel, "__**Honours of " + name + ":**__\n" + get_who_details(name))
         #print(get_who_details(name))
         
+    async def cmd_apl(self, channel, leftover_args):
+        """
+        Usage:
+            {command_prefix}apl
+            {command_prefix}apl [<filename.txt>]
+            {command_prefix}apl all
+
+        Autoplaylist function to "filter" the autoplaylist to list and play specific text files upon which config/autoplaylist.txt is built via buildauto.py.
+        """
+        fileList=""
+        if not leftover_args:
+            for file in os.listdir('config/pls'):
+                if file.endswith('.txt'):
+                    if fileList == "":
+                        fileList = file
+                    else:
+                        fileList += ", " + file
+            return Response("__**Autoplaylist Directory:**__\n```" + fileList + "```\nType **" + self.config.command_prefix + "apl <file>** to set autoplaylist to specific file.\nType **" + self.config.command_prefix + "apl all** to load the default autoplaylist.txt.", delete_after=15)
+        elif leftover_args[0] == "all":
+            self.autoplaylist = load_file(self.config.auto_playlist_file)
+            return Response("Loaded *" + self.config.auto_playlist_file + "*", delete_after=5)
+        else:
+            if os.path.isfile('config/pls/' + leftover_args[0]):    
+                self.autoplaylist = load_file('config/pls/' + leftover_args[0])
+                #await self.safe_send_message(channel, "New autoplaylist *" + leftover_args[0] + "* loaded.")
+                return Response("New autoplaylist *" + leftover_args[0] + "* loaded.", delete_after=5)
+            else:
+                #await self.safe_send_message(channel, "Filename *" + leftover_args[0] + "* is invalid. Use **" + self.config.command_prefix + "apl** to list all valid playlist files.")
+                return Response("Filename *" + leftover_args[0] + "* is invalid. Use **" + self.config.command_prefix + "apl** to list all valid playlist files.", delete_after=5)
     async def on_message(self, message):
         await self.wait_until_ready()
 
