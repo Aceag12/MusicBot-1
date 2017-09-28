@@ -28,7 +28,8 @@ def get_who_details(name):
 		charstring = "**Name:** " + char["fullname"] + "\n**City:** " + char["city"] + "\n"
 		charstring += "**House:** " + char["house"] + "\n**Level:** " + char["level"] + " (*Rank " + char["xp_rank"] + "*)\n"
 		charstring += "**Explorer Rank:** " + char["explorer_rank"] + "\n" 
-		charstring += "**Mobs/Players Killed:** " + char["mob_kills"] + "/" + char["player_kills"]
+		charstring += "**Mobs/Players Killed:** " + char["mob_kills"] + "/" + char["player_kills"] + "\n"
+		charstring += "*Official Link:* https://www.achaea.com/game/honours/" + name
 		
 		return charstring
 	except urllib.error.HTTPError as e:

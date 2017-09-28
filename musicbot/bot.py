@@ -413,9 +413,10 @@ class MusicBot(discord.Client):
         await self.update_now_playing()
 
     async def on_player_finished_playing(self, player, **_):
+		# User queue or current playlist has finished. Queue next song from autoplaylist and allow entry to begin playing.
         if not player.playlist.entries and not player.current_entry and self.config.auto_playlist:
             while self.autoplaylist:
-                song_url = choice(self.autoplaylist)
+                song_url = choice(self.autoplaylist) #choose random entry from autoplaylist - https://docs.python.org/2/library/random.html
                 info = await self.downloader.safe_extract_info(player.playlist.loop, song_url, download=False, process=False)
 
                 if not info:
