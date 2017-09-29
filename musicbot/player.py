@@ -131,7 +131,6 @@ class MusicPlayer(EventEmitter):
             self._current_player.resume()
             self.state = MusicPlayerState.PLAYING
             self.emit('resume', player=self, entry=self.current_entry)
-            return
 
         if self.is_paused and not self._current_player:
             self.state = MusicPlayerState.PLAYING
@@ -226,7 +225,7 @@ class MusicPlayer(EventEmitter):
             return self.resume()
 
         if self.is_dead:
-            return
+            return await self.bot.setstatus("","")
 
         with await self._play_lock:
             if self.is_stopped or _continue:

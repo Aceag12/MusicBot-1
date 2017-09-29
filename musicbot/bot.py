@@ -216,6 +216,12 @@ class MusicBot(discord.Client):
 
         return discord.utils.oauth_url(self.cached_client_id, permissions=permissions, server=server)
 
+    async def setstatus(self,entry_title,entry_url):
+        if not entry_title=="" and not entry_url=="":
+            await self.change_status(game=discord.Game(name=entry_title,
+                                     url=entry_url,
+                                     type=1))
+            #print("[Status] Setting status to " + entry_title + " @ " + entry_url)
     async def get_voice_client(self, channel):
         if isinstance(channel, Object):
             channel = self.get_channel(channel.id)
@@ -449,6 +455,7 @@ class MusicBot(discord.Client):
         game = None
 
         if self.user.bot:
+            
             activeplayers = sum(1 for p in self.players.values() if p.is_playing)
             if activeplayers > 1:
                 game = discord.Game(name="music on %s servers" % activeplayers)
@@ -463,8 +470,8 @@ class MusicBot(discord.Client):
 
             name = u'{}{}'.format(prefix, entry.title)[:128]
             game = discord.Game(name=name)
-
-        await self.change_status(game)
+            await self.setstatus(entry.title,entry.url)
+        # self.change_status(game) # This doesn't exactly work... I fixeded it.
 
 
     async def safe_send_message(self, dest, content, *, tts=False, expire_in=0, also_delete=None, quiet=False):
@@ -1276,10 +1283,17 @@ class MusicBot(discord.Client):
             prog_str = '`[%s/%s]`' % (song_progress, song_total)
 
             if player.current_entry.meta.get('channel', False) and player.current_entry.meta.get('author', False):
-                np_text = "Now Playing: **%s** added by **%s** %s\n" % (
-                    player.current_entry.title, player.current_entry.meta['author'].name, prog_str)
+                if self.config.now_playing_url and not message=="nourl":
+                    np_text = "Now Playing: **%s**\n*%s*\nadded by **%s**\n%s\n" % (
+                        player.current_entry.title, player.current_entry.url, player.current_entry.meta['author'].name, prog_str)
+                else:
+                    np_text = "Now Playing: **%s** added by **%s** %s\n" % (
+                        player.current_entry.title, player.current_entry.meta['author'].name, prog_str)
             else:
-                np_text = "Now Playing: **%s** %s\n" % (player.current_entry.title, prog_str)
+                if self.config.now_playing_url and not message=="nourl":
+                    np_text = "Now Playing: **%s**\n*%s*\n%s\n" % (player.current_entry.title, player.current_entry.url, prog_str)
+                else:
+                    np_text = "Now Playing: **%s**\n%s\n" % (player.current_entry.title, prog_str)
 
             self.server_specific_data[server]['last_np_msg'] = await self.safe_send_message(channel, np_text)
             await self._manual_delete_check(message)
