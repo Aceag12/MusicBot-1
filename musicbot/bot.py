@@ -75,6 +75,7 @@ class MusicBot(discord.Client):
 
         self.blacklist = set(load_file(self.config.blacklist_file))
         self.autoplaylist = load_file(self.config.auto_playlist_file)
+        self.apl_fn = self.config.auto_playlist_file # just the filename.
         self.downloader = downloader.Downloader(download_folder='audio_cache')
 
         self.exit_signal = None
@@ -1863,12 +1864,14 @@ class MusicBot(discord.Client):
                         fileList = file
                     else:
                         fileList += ", " + file
-            return Response("__**Autoplaylist Directory:**__\n```" + fileList + "```\nType **" + self.config.command_prefix + "apl <file>** to set autoplaylist to specific file.\nType **" + self.config.command_prefix + "apl all** to load the default autoplaylist.txt.", delete_after=15)
+            return Response("__**Autoplaylist Directory:**__\n```" + fileList + "```\nLoaded: *" + self.apl_fn + "*\nType **" + self.config.command_prefix + "apl <file>** to set autoplaylist to specific file.\nType **" + self.config.command_prefix + "apl all** to load the default autoplaylist.txt.", delete_after=15)
         elif leftover_args[0] == "all":
             self.autoplaylist = load_file(self.config.auto_playlist_file)
+            self.apl_fn = "autoplaylist.txt"
             return Response("Loaded *" + self.config.auto_playlist_file + "*", delete_after=5)
         else:
             if os.path.isfile('config/pls/' + leftover_args[0]):    
+                self.apl_fn = leftover_args[0]
                 self.autoplaylist = load_file('config/pls/' + leftover_args[0])
                 #await self.safe_send_message(channel, "New autoplaylist *" + leftover_args[0] + "* loaded.")
                 return Response("New autoplaylist *" + leftover_args[0] + "* loaded.", delete_after=5)
