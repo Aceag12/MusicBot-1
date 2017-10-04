@@ -137,7 +137,7 @@ class MusicPlayer(EventEmitter):
             self._kill_current_player()
             return
 
-        raise ValueError('Cannot resume playback from state %s' % self.state)
+        #raise ValueError('Cannot resume playback from state %s' % self.state)
 
     def pause(self):
         if self.is_playing:
