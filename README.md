@@ -26,3 +26,7 @@ If you have any errors, read the FAQ. If that didn't help, you can ask for assis
 ### FAQ
 
 Some frequently asked questions are listed on the wiki [here](https://github.com/SexualRhinoceros/MusicBot/wiki/FAQ "Wiki").
+
+### depwl9992's fork
+
+[CLICK HERE](https://github.com/depwl9992/MusicBot/wiki/Daniel's-Forked-Changes) for changes made in depwl9992's fork.
