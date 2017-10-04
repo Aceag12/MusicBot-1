@@ -93,7 +93,7 @@ class MusicBot(discord.Client):
         super().__init__()
         self.aiosession = aiohttp.ClientSession(loop=self.loop)
         self.http.user_agent += ' MusicBot/%s' % BOTVERSION
-
+        self.g_entry_title = "" # Global entry_title for tracking track changes.
     # TODO: Add some sort of `denied` argument for a message to send when someone else tries to use it
     def owner_only(func):
         @wraps(func)
@@ -218,6 +218,14 @@ class MusicBot(discord.Client):
         return discord.utils.oauth_url(self.cached_client_id, permissions=permissions, server=server)
 
     async def setstatus(self,entry_title,entry_url):
+        if not self.g_entry_title == entry_title and not entry_title == "PAUSED" and self.config.save_history:
+            self.g_entry_title = entry_title
+            # Write new title to history.txt
+            f=open(self.config.history_file,"a+")
+            f.write(str(int(time.time())) + "|" + self.g_entry_title + "\r\n")
+            f.close()
+            if self.config.debug_mode:
+                print("New history entry: " + str(int(time.time())) + "|" + self.g_entry_title)
         if not entry_title=="" and not entry_url=="":
             await self.change_status(game=discord.Game(name=entry_title,
                                      url=entry_url,
@@ -471,7 +479,10 @@ class MusicBot(discord.Client):
 
             name = u'{}{}'.format(prefix, entry.title)[:128]
             game = discord.Game(name=name)
-            await self.setstatus(entry.title,entry.url)
+            if is_paused:
+                await self.setstatus("PAUSED",entry.url)
+            else:
+                await self.setstatus(entry.title,entry.url)
         # self.change_status(game) # This doesn't exactly work... I fixeded it.
 
 

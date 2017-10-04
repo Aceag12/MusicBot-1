@@ -7,6 +7,7 @@ audio_cache/
 dectalk/
 config/pls/*.txt
 config/autoplaylist.txt
+config/history.txt
 
 discord.log
 config/options.ini
