@@ -1292,7 +1292,8 @@ class MusicBot(discord.Client):
 
             song_progress = str(timedelta(seconds=player.progress)).lstrip('0').lstrip(':')
             song_total = str(timedelta(seconds=player.current_entry.duration)).lstrip('0').lstrip(':')
-            prog_str = '`[%s/%s]`' % (song_progress, song_total)
+            percentage = str(round(100*float(player.progress)/float(player.current_entry.duration),3))
+            prog_str = '`[%s/%s] (%s%%)`' % (song_progress, song_total, percentage)
 
             if player.current_entry.meta.get('channel', False) and player.current_entry.meta.get('author', False):
                 if self.config.now_playing_url and not message=="nourl":
@@ -1544,7 +1545,8 @@ class MusicBot(discord.Client):
         if player.current_entry:
             song_progress = str(timedelta(seconds=player.progress)).lstrip('0').lstrip(':')
             song_total = str(timedelta(seconds=player.current_entry.duration)).lstrip('0').lstrip(':')
-            prog_str = '`[%s/%s]`' % (song_progress, song_total)
+            percentage = str(round(100*float(player.progress)/float(player.current_entry.duration),3))
+            prog_str = '`[%s/%s] (%s%%)`' % (song_progress, song_total, percentage)
 
             if player.current_entry.meta.get('channel', False) and player.current_entry.meta.get('author', False):
                 lines.append("Now Playing: **%s** added by **%s** %s\n" % (
