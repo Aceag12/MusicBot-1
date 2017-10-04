@@ -217,20 +217,15 @@ class MusicBot(discord.Client):
 
         return discord.utils.oauth_url(self.cached_client_id, permissions=permissions, server=server)
 
-    async def setstatus(self,entry_title,entry_url):
-        if not self.g_entry_title == entry_title and not entry_title == "PAUSED" and self.config.save_history:
+    async def log_entry(self,entry_title,entry_url):
+        if not self.g_entry_title == entry_title and self.config.save_history:
             self.g_entry_title = entry_title
-            # Write new title to history.txt
             f=open(self.config.history_file,"a+")
             f.write(str(int(time.time())) + "|" + self.g_entry_title + "\r\n")
             f.close()
             if self.config.debug_mode:
                 print("New history entry: " + str(int(time.time())) + "|" + self.g_entry_title)
-        if not entry_title=="" and not entry_url=="":
-            await self.change_status(game=discord.Game(name=entry_title,
-                                     url=entry_url,
-                                     type=1))
-            #print("[Status] Setting status to " + entry_title + " @ " + entry_url)
+
     async def get_voice_client(self, channel):
         if isinstance(channel, Object):
             channel = self.get_channel(channel.id)
@@ -476,13 +471,12 @@ class MusicBot(discord.Client):
 
         if entry:
             prefix = u'\u275A\u275A ' if is_paused else ''
-
             name = u'{}{}'.format(prefix, entry.title)[:128]
             game = discord.Game(type=0,name=name)
-            await self.setstatus(name,entry.url)
+            if self.config.save_history and not is_paused:
+                    await self.log_entry(name,entry.url)
 
-        #await self.change_status(game) # This doesn't exactly work... I fixeded it.
-
+        await self.change_status(game)
 
     async def safe_send_message(self, dest, content, *, tts=False, expire_in=0, also_delete=None, quiet=False):
         msg = None
