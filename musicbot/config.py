@@ -70,6 +70,7 @@ class Config:
         self.default_volume = config.getfloat('MusicBot', 'DefaultVolume', fallback=ConfigDefaults.default_volume)
         self.skips_required = config.getint('MusicBot', 'SkipsRequired', fallback=ConfigDefaults.skips_required)
         self.skip_ratio_required = config.getfloat('MusicBot', 'SkipRatio', fallback=ConfigDefaults.skip_ratio_required)
+        self.scrobble_ratio = config.getfloat('MusicBot', 'ScrobbleRatio', fallback=ConfigDefaults.scrobble_ratio)
         self.save_videos = config.getboolean('MusicBot', 'SaveVideos', fallback=ConfigDefaults.save_videos)
         self.save_history = config.getboolean('MusicBot', 'SaveHistory', fallback=ConfigDefaults.save_history)
         self.now_playing_mentions = config.getboolean('MusicBot', 'NowPlayingMentions', fallback=ConfigDefaults.now_playing_mentions)
@@ -181,6 +182,7 @@ class ConfigDefaults:
     default_volume = 0.15
     skips_required = 4
     skip_ratio_required = 0.5
+    scrobble_ratio = 0.5
     save_videos = True
     save_history = False
     now_playing_mentions = False
