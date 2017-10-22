@@ -27,7 +27,7 @@ from musicbot.player import MusicPlayer
 from musicbot.config import Config, ConfigDefaults
 from musicbot.permissions import Permissions, PermissionsDefaults
 from musicbot.utils import load_file, write_file, sane_round_int
-from musicbot.achaea import get_who, get_who_details, get_banner
+from musicbot.achaea import Achaea
 
 from . import exceptions
 from . import downloader
@@ -71,6 +71,7 @@ class MusicBot(discord.Client):
         self.voice_client_move_lock = asyncio.Lock()
 
         self.config = Config(config_file)
+        self.achaea = Achaea
         self.permissions = Permissions(perms_file, grant_all=[self.config.owner_id])
 
         self.blacklist = set(load_file(self.config.blacklist_file))
@@ -1840,7 +1841,7 @@ class MusicBot(discord.Client):
         Displays all online players in Achaea.
         """
         
-        data = get_who()
+        data = self.achaea.get_who()
         
         await self.safe_send_message(channel, "__**Who's online in Achaea:**__\n```" + data + "```\n\nTry **" + self.config.command_prefix + "ahonours <name>** to check out character details!")
         
@@ -1851,10 +1852,10 @@ class MusicBot(discord.Client):
 
         Display character details for Achaean player.
         """
-        imagePath = get_banner(name)
+        imagePath = self.achaea.get_banner(name)
         with open(imagePath,"rb") as f:
             await self.send_file(channel, f)
-        await self.safe_send_message(channel, "__**Honours of " + name + ":**__\n" + get_who_details(name))
+        await self.safe_send_message(channel, "__**Honours of " + name + ":**__\n" + self.achaea.get_who_details(name))
         #print(get_who_details(name))
         
     async def cmd_apl(self, channel, leftover_args):
