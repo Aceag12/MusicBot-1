@@ -1,0 +1,17 @@
+{
+    "suffixes": {
+        "suffix0": "[Official Music Video]",
+        "suffix1":"(Official Music Video)",
+        "suffix2":"(Official Lyric Video)",
+        "suffix3":"[Official Lyric Video]",
+        "suffix4":"(Official Video)",
+        "suffix5":"(Music Video)",
+        "suffix6":"(Lyric Video)",
+        "suffix7":"w/Lyrics"
+    },
+    
+    "dashes": {
+        "dash0":"  -  ",
+        "dash1":" // "
+    }
+}
