@@ -10,5 +10,9 @@ config/autoplaylist.txt
 config/history.txt
 
 discord.log
+logs/
+data/
 config/options.ini
 config/permissions.ini
+config/autoplaylist.txt
+config/autoplaylist_removed.txt
