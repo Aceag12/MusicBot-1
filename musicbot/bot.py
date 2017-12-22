@@ -477,7 +477,7 @@ class MusicBot(discord.Client):
             if self.config.save_history and not is_paused:
                     await self.log_entry(name,entry.url)
 
-        await self.change_presence(game)
+        await self.change_presence(game=game)
 
     async def safe_send_message(self, dest, content, *, tts=False, expire_in=0, also_delete=None, quiet=False):
         msg = None
