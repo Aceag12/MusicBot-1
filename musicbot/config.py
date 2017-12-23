@@ -18,7 +18,6 @@ class Config:
 
         config = configparser.ConfigParser(interpolation=None)
         config.read(config_file, encoding='utf-8')
-
         confsections = {"Credentials", "Permissions", "Chat", "MusicBot"}.difference(config.sections())
         if confsections:
             raise HelpfulError(
@@ -291,7 +290,9 @@ class ConfigDefaults:
     blacklist_file = 'config/blacklist.txt'
     auto_playlist_file = 'config/autoplaylist.txt' # this will change when I add playlists
     history_file = 'config/history.txt'
-
+    email = None
+    password = None
+    token = None
 # These two are going to be wrappers for the id lists, with add/remove/load/save functions
 # and id/object conversion so types aren't an issue
 class Blacklist:
