@@ -1708,25 +1708,39 @@ class MusicBot(discord.Client):
 
             song_percentage = str(round(100*float(player.progress)/float(player.current_entry.duration),3))
             streaming = isinstance(player.current_entry, StreamPlaylistEntry)
-            prog_str = ('`[{progress}]`' if streaming else '`[{progress}/{total}] ({percentage}%%)`').format(
+            prog_str = ('`[{progress}]`' if streaming else '`[{progress}/{total}] ({percentage}%)`').format(
 			    progress=song_progress, total=song_total, percentage=song_percentage
             )
             action_text = 'Streaming' if streaming else 'Playing'
+            urlstr=""
+            urlplt="<"
+            urlpgt=">"
+
+            if (self.config.now_playing_url):
+                if (self.config.inline_player):
+                    urlplt="*" # clear and italicize if InlinePlayer is enabled
+                    urlpgt="*"
+
+                urlstr="\n\N{WHITE RIGHT POINTING BACKHAND INDEX} {lt}{url}{gt}".format(
+                    url=player.current_entry.url,
+                    lt=urlplt,
+                    gt=urlpgt
+                )
 
             if player.current_entry.meta.get('channel', False) and player.current_entry.meta.get('author', False):
-                np_text = "Now {action}: **{title}** added by **{author}** {progress}\n\N{WHITE RIGHT POINTING BACKHAND INDEX} <{url}>".format(
+                np_text = "Now {action}: **{title}** added by **{author}** {progress}{npurl}".format(
                     action=action_text,
                     title=player.current_entry.title,
                     author=player.current_entry.meta['author'].name,
                     progress=prog_str,
-                    url=player.current_entry.url
+                    npurl=urlstr
                 )
             else:
-                np_text = "Now {action}: **{title}** {progress}\n\N{WHITE RIGHT POINTING BACKHAND INDEX} <{url}>".format(
+                np_text = "Now {action}: **{title}** {progress}{npurl}".format(
                     action=action_text,
                     title=player.current_entry.title,
                     progress=prog_str,
-                    url=player.current_entry.url
+                    npurl=urlstr
                 )
 
             self.server_specific_data[server]['last_np_msg'] = await self.safe_send_message(channel, np_text)
