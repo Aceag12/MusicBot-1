@@ -142,6 +142,7 @@ class MusicPlayer(EventEmitter, Serializable):
             self._current_player.resume()
             self.state = MusicPlayerState.PLAYING
             self.emit('resume', player=self, entry=self.current_entry)
+            self.auto_pause() # Pause if nobody else is in the voice channel.
             return
 
         if self.is_paused and not self._current_player:
@@ -165,6 +166,15 @@ class MusicPlayer(EventEmitter, Serializable):
             return
 
         raise ValueError('Cannot pause a MusicPlayer in state %s' % self.state)
+
+    def auto_pause(self):
+        # Sanity check - auto-pause if no other people are in the voice channel.
+        if self.bot._check_if_empty(self.voice_client.channel) and self.bot.config.auto_pause:
+            log.info("Autopause - Nobody else in voice channel.")
+            self.state = MusicPlayerState.PAUSED
+            if self._current_player:
+                self._current_player.pause()
+            self.emit('pause', player=self, entry=self.current_entry)
 
     def kill(self):
         self.state = MusicPlayerState.DEAD
@@ -234,9 +244,6 @@ class MusicPlayer(EventEmitter, Serializable):
         self.loop.create_task(self._play(_continue=_continue))
 
     async def _play(self, _continue=False):
-        """
-            Plays the next entry from the playlist, or resumes playback of the current entry if paused.
-        """
         if self.is_paused:
             return self.resume()
 
@@ -293,6 +300,9 @@ class MusicPlayer(EventEmitter, Serializable):
                 self._current_player.start()
 
                 self.emit('play', player=self, entry=entry)
+                
+                # Must put player in "playing" state before we can pause.
+                self.auto_pause()
 
     def _monkeypatch_player(self, player):
         original_buff = player.buff

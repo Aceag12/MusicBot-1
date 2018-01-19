@@ -92,7 +92,8 @@ class MusicBot(discord.Client):
         super().__init__()
         self.aiosession = aiohttp.ClientSession(loop=self.loop)
         self.http.user_agent += ' MusicBot/%s' % BOTVERSION
-
+        self.g_entry_title = "" # Global entry_title for tracking track changes.
+        
     def __del__(self):
         # These functions return futures but it doesn't matter
         try:    self.http.session.close()
@@ -410,6 +411,14 @@ class MusicBot(discord.Client):
         self.connection._add_voice_client(server.id, voice)
         return voice
 
+    async def log_entry(self,entry_title,entry_url):
+        if not self.g_entry_title == entry_title and self.config.save_history:
+            self.g_entry_title = entry_title
+            f=open(self.config.history_file,"a+")
+            f.write(str(int(time.time())) + "|" + self.g_entry_title + "\r\n")
+            f.close()
+            if self.config.debug_mode:
+                print("New history entry: " + str(int(time.time())) + "|" + self.g_entry_title)
 
     async def get_voice_client(self, channel: discord.Channel):
         if isinstance(channel, discord.Object):
@@ -629,6 +638,9 @@ class MusicBot(discord.Client):
         await self.update_now_playing_status()
 
     async def on_player_finished_playing(self, player, **_):
+        """
+            Plays the next entry from the playlist, or resumes playback of the current entry if paused.
+        """
         if not player.playlist.entries and not player.current_entry and self.config.auto_playlist:
             while self.autoplaylist:
                 random.shuffle(self.autoplaylist)
@@ -712,7 +724,9 @@ class MusicBot(discord.Client):
 
             name = u'{}{}'.format(prefix, entry.title)[:128]
             game = discord.Game(name=name)
-
+            if self.config.save_history and not is_paused:
+                await self.log_entry(name,entry.url)
+                
         async with self.aiolocks[_func_()]:
             if game != self.last_status:
                 await self.change_presence(game=game)
