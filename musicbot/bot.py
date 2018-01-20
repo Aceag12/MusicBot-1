@@ -721,6 +721,7 @@ class MusicBot(discord.Client):
 
         if entry:
             prefix = u'\u275A\u275A ' if is_paused else ''
+            status = discord.Status.idle if is_paused else discord.Status.online
 
             name = u'{}{}'.format(prefix, entry.title)[:128]
             game = discord.Game(name=name)
@@ -729,7 +730,7 @@ class MusicBot(discord.Client):
                 
         async with self.aiolocks[_func_()]:
             if game != self.last_status:
-                await self.change_presence(game=game)
+                await self.change_presence(game=game,status=status)
                 self.last_status = game
 
     async def update_now_playing_message(self, server, message, *, channel=None):
