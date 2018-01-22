@@ -2383,6 +2383,23 @@ class MusicBot(discord.Client):
             await self.send_file(channel, f)
         await self.safe_send_message(channel, "__**Honours of " + name + ":**__\n" + self.achaea.get_who_details(name))
         #print(get_who_details(name))
+    async def cmd_anews(self, channel, leftover_args):
+        """
+        Usage:
+            {command_prefix}anews
+            
+        Display news channel list.
+        """
+        if not leftover_args:
+            data = self.achaea.get_news("","") # Request channel listing.
+            await self.safe_send_message(channel, data + "\n\nTry **" + self.config.command_prefix + "anews <channel>** to view recent posts titles!")
+        elif leftover_args[0] != "":
+            if len(leftover_args) == 1: # Only channel name is given.
+                data = self.achaea.get_news(leftover_args[0],"") # Get post listing only.
+                await self.safe_send_message(channel, data + "\n\n Try **" + self.config.command_prefix + "anews <channel> <post_num>** to view post contents!")
+            elif len(leftover_args) == 2: # Two arguments means second should be a number.
+                data = self.achaea.get_news(leftover_args[0],leftover_args[1]) # Get post data
+                await self.safe_send_message(channel, data)
         
     async def cmd_apl(self, channel, leftover_args):
         """
@@ -2401,7 +2418,7 @@ class MusicBot(discord.Client):
                         fileList = file
                     else:
                         fileList += ", " + file
-            return Response("__**Autoplaylist Directory:**__\n```" + fileList + "```\nLoaded: *" + self.apl_fn + "*\nType **" + self.config.command_prefix + "apl <file>** to set autoplaylist to specific file.\nType **" + self.config.command_prefix + "apl all** to load the default autoplaylist.txt.", delete_after=15)
+            return Response("__**Autoplaylist Directory:**__\n```" + fileList + "```\nLoaded: *" + self.apl_fn + "*\nType **" + self.config.command_prefix + "apl <file>** to set autoplaylist to specific file.\nType **" + self.config.command_prefix + "apl all** to load the default autoplaylist.txt *(also reloads if changes were made)*.", delete_after=15)
         elif leftover_args[0] == "all":
             self.autoplaylist = load_file(self.config.auto_playlist_file)
             self.apl_fn = "autoplaylist.txt"
