@@ -1968,24 +1968,28 @@ class MusicBot(discord.Client):
                     prog_bar_str += '■'
 
             action_text = self.str.get('cmd-np-action-streaming', 'Streaming') if streaming else self.str.get('cmd-np-action-playing', 'Playing')
-
+            ilt_str = "" if self.config.inline_player else "<"
+            igt_str = "" if self.config.inline_player else ">"
             if player.current_entry.meta.get('channel', False) and player.current_entry.meta.get('author', False):
-                np_text = self.str.get('cmd-np-reply-author', "Now {action}: **{title}** added by **{author}**\nProgress: {progress_bar} {progress}\n\N{WHITE RIGHT POINTING BACKHAND INDEX} <{url}>").format(
+                np_text = self.str.get('cmd-np-reply-author', "Now {action}: **{title}** added by **{author}**\nProgress: {progress_bar} {progress}\n\n{WHITE RIGHT POINTING BACKHAND INDEX} {ilt}{url}{igt}").format(
                     action=action_text,
                     title=player.current_entry.title,
                     author=player.current_entry.meta['author'].name,
                     progress_bar=prog_bar_str,
                     progress=prog_str,
+                    ilt=ilt_str,
+                    igt=igt_str,
                     url=player.current_entry.url
                 )
             else:
 
-                np_text = self.str.get('cmd-np-reply-noauthor', "Now {action}: **{title}**\nProgress: {progress_bar} {progress}\n\N{WHITE RIGHT POINTING BACKHAND INDEX} <{url}>").format(
-
+                np_text = self.str.get('cmd-np-reply-noauthor', "Now {action}: **{title}**\nProgress: {progress_bar} {progress}\n\n{WHITE RIGHT POINTING BACKHAND INDEX} {ilt}{url}{igt}").format(
                     action=action_text,
                     title=player.current_entry.title,
                     progress_bar=prog_bar_str,
                     progress=prog_str,
+                    ilt=ilt_str,
+                    igt=igt_str,
                     url=player.current_entry.url
                 )
 
