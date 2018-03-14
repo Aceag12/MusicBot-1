@@ -1,8 +1,6 @@
 import os
 import asyncio
 import logging
-import json
-import os
 import traceback
 
 from enum import Enum
@@ -53,6 +51,7 @@ class BasePlaylistEntry(Serializable):
             asyncio.ensure_future(self._download())
             self._waiting_futures.append(future)
 
+        log.debug('Created future for {0}'.format(self.filename))
         return future
 
     def _for_each_future(self, cb):
@@ -120,7 +119,7 @@ class URLPlaylistEntry(BasePlaylistEntry):
             url = data['url']
             title = data['title']
             duration = data['duration']
-            downloaded = data['downloaded']
+            downloaded = data['downloaded'] if playlist.bot.config.save_videos else False
             filename = data['filename'] if downloaded else None
             expected_filename = data['expected_filename']
             meta = {}
@@ -221,10 +220,13 @@ class URLPlaylistEntry(BasePlaylistEntry):
 	# depwl - This is where we ACTUALLY download a youtube video for playback if it is not cached.
         log.info("Download started: {}".format(self.url))
 
-        try:
-            result = await self.playlist.downloader.extract_info(self.playlist.loop, self.url, download=True)
-        except Exception as e:
-            raise ExtractionError(e)
+        retry = True
+        while retry:
+            try:
+                result = await self.playlist.downloader.extract_info(self.playlist.loop, self.url, download=True)
+                break
+            except Exception as e:
+                raise ExtractionError(e)
 
         log.info("Download complete: {}".format(self.url))
 
