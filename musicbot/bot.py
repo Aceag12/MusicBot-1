@@ -2788,6 +2788,7 @@ class MusicBot(discord.Client):
                 self.apl_fn = leftover_args[0]
                 self.autoplaylist = load_file('config/pls/' + leftover_args[0])
                 #await self.safe_send_message(channel, "New autoplaylist *" + leftover_args[0] + "* loaded.")
+                log.info("Loaded autoplaylist with {} entries".format(len(self.autoplaylist)))
                 return Response("New autoplaylist *" + leftover_args[0] + "* loaded.", delete_after=5)
             else:
                 #await self.safe_send_message(channel, "Filename *" + leftover_args[0] + "* is invalid. Use **" + self.config.command_prefix + "apl** to list all valid playlist files.")
