@@ -29,8 +29,8 @@
 # CHANGE to fit your game (obs: no spaces around the '=')
 
 GAMENAME="MusicBot"
-VIRTUALENV="/home/daniel/Discord"
-GAMEDIR="/home/daniel/Discord/MusicBot"
+VIRTUALENV="/home/daniel/Discord3_6"
+GAMEDIR="/home/daniel/Discord3_6/MusicBot"
 
 #------------------------------------------------------------
 
